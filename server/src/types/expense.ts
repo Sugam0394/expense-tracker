@@ -13,6 +13,7 @@ export interface CreateExpenseInput {
   description: string;
   date: string;
   category_id: number;
+  category?: string;
 }
 
 export interface UpdateExpenseInput {
@@ -20,4 +21,5 @@ export interface UpdateExpenseInput {
   description: string;
   date: string;
   category_id: number;
+  category?: string;
 }

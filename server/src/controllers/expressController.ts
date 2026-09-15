@@ -1,119 +1,151 @@
- import type { Request, Response } from "express";
+import type { Request, Response } from "express";
+
 import {
-  getExpenses as getExpensesFromRepository,
-  getExpenseById as getExpenseByIdFromRepository,
-  createExpense as createExpenseInRepository,
-  updateExpense as updateExpenseFromRepository,
-  deleteExpense as deleteExpenseFromRepository,
-} from "../repositories/expenseRepository.js";
+  createExpenseService,
+  getExpensesService,
+  getExpenseByIdService,
+  updateExpenseService,
+  deleteExpenseService,
+} from "../services/expense.service.js";
 
-export const getExpenses = async (_req: Request, res: Response) => {
-  const expenses = await getExpensesFromRepository();
-
-  res.json(expenses);
-};
-
-export const getExpenseById = async (req: Request, res: Response) => {
+// Create expense
+export const createExpenseController = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const id = Number(req.params.id);
+    const expense = req.body;
 
-    // Call the repository function instead of the controller itself
-    const expense = await getExpenseByIdFromRepository(id);
-
-    if (!expense) {
-      res.status(404).json({
-        message: "Expense not found",
-      });
-      return;
-    }
-
-    res.status(200).json(expense);
-  } catch (error) {
-    console.error("Error fetching expense:", error);
-
-    res.status(500).json({
-      message: "Failed to fetch expense",
-    });
-  }
-};
-
-export const createExpense = async (req: Request, res: Response) => {
-  try {
-    const { amount, description, date, category_id } = req.body;
-
-    const expenseId = await createExpenseInRepository({
-      amount,
-      description,
-      date,
-      category_id,
-    });
+    const expenseId = await createExpenseService(expense);
 
     res.status(201).json({
+      success: true,
       message: "Expense created successfully",
-      id: expenseId,
+      data: {
+        id: expenseId,
+      },
     });
   } catch (error) {
     console.error("Error creating expense:", error);
 
     res.status(500).json({
+      success: false,
       message: "Failed to create expense",
     });
   }
 };
 
- export const updateExpense = async (req: Request, res: Response) => {
+// Get all expenses
+export const getExpensesController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const expenses = await getExpensesService();
+
+    res.status(200).json({
+      success: true,
+      data: expenses,
+    });
+  } catch (error) {
+    console.error("Error fetching expenses:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch expenses",
+    });
+  }
+};
+
+// Get expense by ID
+export const getExpenseByIdController = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const id = Number(req.params.id);
-    const { amount, description, date, category_id } = req.body;
 
-    // Pass the fields as a single object to match the repository's UpdateExpenseInput type
-    const success = await updateExpenseFromRepository(id, {
-      amount,
-      description,
-      date,
-      category_id,
-    });
+    const expense = await getExpenseByIdService(id);
 
-    // The repository returns a boolean (true if successful, false if not found)
-    if (!success) {
-      res.status(404).json({
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
         message: "Expense not found",
       });
-      return;
     }
 
     res.status(200).json({
+      success: true,
+      data: expense,
+    });
+  } catch (error) {
+    console.error("Error fetching expense:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch expense",
+    });
+  }
+};
+
+// Update expense
+export const updateExpenseController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id = Number(req.params.id);
+    const expense = req.body;
+
+    const updatedExpense = await updateExpenseService(id, expense);
+
+    if (!updatedExpense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
       message: "Expense updated successfully",
     });
   } catch (error) {
     console.error("Error updating expense:", error);
 
     res.status(500).json({
+      success: false,
       message: "Failed to update expense",
     });
   }
 };
 
- export const deleteExpense = async (req: Request, res: Response) => {
+// Delete expense
+export const deleteExpenseController = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const id = Number(req.params.id);
 
-    const result = await deleteExpenseFromRepository(id);
+    const deletedExpense = await deleteExpenseService(id);
 
-    if (!result) {
-      res.status(404).json({
+    if (!deletedExpense) {
+      return res.status(404).json({
+        success: false,
         message: "Expense not found",
       });
-      return;
     }
 
     res.status(200).json({
+      success: true,
       message: "Expense deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting expense:", error);
 
     res.status(500).json({
+      success: false,
       message: "Failed to delete expense",
     });
   }
