@@ -28,6 +28,16 @@ export const createExpenseController = async (
   } catch (error) {
     console.error("Error creating expense:", error);
 
+
+        if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+
+
     res.status(500).json({
       success: false,
       message: "Failed to create expense",
@@ -74,12 +84,24 @@ export const getExpenseByIdController = async (
       });
     }
 
+
+
+
     res.status(200).json({
       success: true,
       data: expense,
     });
   } catch (error) {
     console.error("Error fetching expense:", error);
+
+
+     if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
 
     res.status(500).json({
       success: false,
@@ -113,6 +135,13 @@ export const updateExpenseController = async (
   } catch (error) {
     console.error("Error updating expense:", error);
 
+    if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to update expense",
@@ -143,6 +172,14 @@ export const deleteExpenseController = async (
     });
   } catch (error) {
     console.error("Error deleting expense:", error);
+
+
+       if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
 
     res.status(500).json({
       success: false,

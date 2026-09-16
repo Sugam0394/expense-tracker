@@ -12,7 +12,7 @@ import type {
 } from "../types/expense.js";
 
 // Create expense
-export const createExpenseService = async (
+ export const createExpenseService = async (
   expense: CreateExpenseInput
 ): Promise<number> => {
   // Business rule: amount must be greater than 0
@@ -30,9 +30,9 @@ export const createExpenseService = async (
     throw new Error("Expense date is required");
   }
 
-  // Business rule: category is required
-  if (!expense.category?.trim()) {
-    throw new Error("Expense category is required");
+  // Business rule: category ID is required
+  if (!Number.isInteger(expense.category_id) || expense.category_id <= 0) {
+    throw new Error("Valid expense category is required");
   }
 
   return await createExpense(expense);
@@ -53,7 +53,7 @@ export const getExpenseByIdService = async (id: number) => {
 };
 
 // Update expense
-export const updateExpenseService = async (
+ export const updateExpenseService = async (
   id: number,
   expense: UpdateExpenseInput
 ) => {
@@ -77,10 +77,10 @@ export const updateExpenseService = async (
   }
 
   if (
-    expense.category !== undefined &&
-    !expense.category.trim()
+    expense.category_id !== undefined &&
+    (!Number.isInteger(expense.category_id) || expense.category_id <= 0)
   ) {
-    throw new Error("Expense category cannot be empty");
+    throw new Error("Valid expense category is required");
   }
 
   return await updateExpense(id, expense);
