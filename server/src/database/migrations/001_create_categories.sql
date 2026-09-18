@@ -1,8 +1,4 @@
- USE expense_tracker;
-
-CREATE TABLE categories (
+ CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE
 );
-
-SHOW TABLES;

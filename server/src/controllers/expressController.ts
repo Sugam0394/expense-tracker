@@ -57,7 +57,7 @@ export const getExpensesController = async (
 
     const responseData: ExpenseResponse[] = expenses.map((expense) => ({
       id: expense.id,
-      amount: expense.amount.toFixed(2),
+      amount: expense.amount,
       description: expense.description,
       date: expense.date,
       category: expense.category,
@@ -98,7 +98,7 @@ export const getExpenseByIdController = async (
 
     const responseData: ExpenseResponse = {
       id: expense.id,
-      amount: expense.amount.toFixed(2),
+      amount: expense.amount,
       description: expense.description,
       date: expense.date,
       category: expense.category,
