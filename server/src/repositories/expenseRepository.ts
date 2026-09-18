@@ -1,6 +1,12 @@
 import pool from "../config/database.js";
 import type { Expense , CreateExpenseInput , UpdateExpenseInput } from "../types/expense.js";
 
+
+
+export const getExpensesService = async (): Promise<Expense[]> => {
+  return await getExpenses();
+};
+
 export async function getExpenses(): Promise<Expense[]> {
   const [rows] = await pool.execute(`
     SELECT

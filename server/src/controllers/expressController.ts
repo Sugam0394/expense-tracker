@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-
+import type { ExpenseListResponse , ExpenseResponse, SingleExpenseResponse } from "../types/expense.js";
 import {
   createExpenseService,
   getExpensesService,
@@ -7,6 +7,8 @@ import {
   updateExpenseService,
   deleteExpenseService,
 } from "../services/expense.service.js";
+
+
 
 // Create expense
 export const createExpenseController = async (
@@ -44,8 +46,8 @@ export const createExpenseController = async (
     });
   }
 };
-
-// Get all expenses
+ 
+ // Get all expenses
 export const getExpensesController = async (
   req: Request,
   res: Response
@@ -53,10 +55,20 @@ export const getExpensesController = async (
   try {
     const expenses = await getExpensesService();
 
-    res.status(200).json({
+    const responseData: ExpenseResponse[] = expenses.map((expense) => ({
+      id: expense.id,
+      amount: expense.amount.toFixed(2),
+      description: expense.description,
+      date: expense.date,
+      category: expense.category,
+    }));
+
+    const response: ExpenseListResponse = {
       success: true,
-      data: expenses,
-    });
+      data: responseData,
+    };
+
+    res.status(200).json(response);
   } catch (error) {
     console.error("Error fetching expenses:", error);
 
@@ -84,12 +96,18 @@ export const getExpenseByIdController = async (
       });
     }
 
-
+    const responseData: ExpenseResponse = {
+      id: expense.id,
+      amount: expense.amount.toFixed(2),
+      description: expense.description,
+      date: expense.date,
+      category: expense.category,
+    };
 
 
     res.status(200).json({
       success: true,
-      data: expense,
+      data: responseData,
     });
   } catch (error) {
     console.error("Error fetching expense:", error);

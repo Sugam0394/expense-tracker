@@ -1,6 +1,4 @@
-
-
-export interface Expense {
+ export interface Expense {
   id: number;
   amount: number;
   description: string;
@@ -23,3 +21,23 @@ export interface UpdateExpenseInput {
   category_id: number;
   category?: string;
 }
+
+export interface ExpenseResponse {
+  id: number;
+  amount: string;
+  description: string;
+  date: string;
+  category: string;
+}
+
+export interface SingleExpenseResponse {
+  success: true;
+  data: ExpenseResponse;
+}
+
+export interface ExpenseListResponse {
+  success: true;
+  data: ExpenseResponse[];
+}
+
+

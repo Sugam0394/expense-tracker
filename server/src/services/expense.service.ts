@@ -9,6 +9,7 @@
 import type {
   CreateExpenseInput,
   UpdateExpenseInput,
+  Expense,
 } from "../types/expense.js";
 
 // Create expense
@@ -39,7 +40,7 @@ import type {
 };
 
 // Get all expenses
-export const getExpensesService = async () => {
+export const getExpensesService = async (): Promise<Expense[]> => { 
   return await getExpenses();
 };
 
