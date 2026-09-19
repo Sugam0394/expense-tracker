@@ -105,10 +105,12 @@ export const getExpenseByIdController = async (
     };
 
 
-    res.status(200).json({
-      success: true,
-      data: responseData,
-    });
+  const response: SingleExpenseResponse = {
+  success: true,
+  data: responseData,
+};
+
+res.status(200).json(response);
   } catch (error) {
     console.error("Error fetching expense:", error);
 
@@ -128,7 +130,7 @@ export const getExpenseByIdController = async (
   }
 };
 
-// Update expense
+ // Update expense
 export const updateExpenseController = async (
   req: Request,
   res: Response
@@ -148,7 +150,13 @@ export const updateExpenseController = async (
 
     res.status(200).json({
       success: true,
-      message: "Expense updated successfully",
+      data: {
+        id: updatedExpense.id,
+        amount: updatedExpense.amount,
+        description: updatedExpense.description,
+        date: updatedExpense.date,
+        category: updatedExpense.category,
+      },
     });
   } catch (error) {
     console.error("Error updating expense:", error);
@@ -166,7 +174,6 @@ export const updateExpenseController = async (
     });
   }
 };
-
 // Delete expense
 export const deleteExpenseController = async (
   req: Request,

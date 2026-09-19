@@ -4,6 +4,7 @@
   getExpenseById,
   updateExpense,
   deleteExpense,
+  categoryExists
 } from "../repositories/expenseRepository.js";
 
 import type {
@@ -34,6 +35,13 @@ import type {
   // Business rule: category ID is required
   if (!Number.isInteger(expense.category_id) || expense.category_id <= 0) {
     throw new Error("Valid expense category is required");
+  }
+
+  // Business rule: category must exist
+  const exists = await categoryExists(expense.category_id);
+
+  if (!exists) {
+    throw new Error("Category not found");
   }
 
   return await createExpense(expense);
@@ -83,6 +91,14 @@ export const getExpenseByIdService = async (id: number) => {
   ) {
     throw new Error("Valid expense category is required");
   }
+
+  if (expense.category_id !== undefined) {
+  const exists = await categoryExists(expense.category_id);
+
+  if (!exists) {
+    throw new Error("Category not found");
+  }
+}
 
   return await updateExpense(id, expense);
 };

@@ -70,10 +70,10 @@ export async function createExpense(
   return insertResult.insertId;
 }
 
-export async function updateExpense(
+ export async function updateExpense(
   expenseId: number,
   expense: UpdateExpenseInput
-): Promise<boolean> {
+): Promise<Expense | null> {
   const [result] = await pool.execute(
     `
     UPDATE expenses
@@ -95,7 +95,11 @@ export async function updateExpense(
 
   const updateResult = result as { affectedRows: number };
 
-  return updateResult.affectedRows > 0;
+  if (updateResult.affectedRows === 0) {
+    return null;
+  }
+
+  return await getExpenseById(expenseId);
 }
 
 export async function deleteExpense(
@@ -112,4 +116,21 @@ export async function deleteExpense(
   const deleteResult = result as { affectedRows: number };
 
   return deleteResult.affectedRows > 0;
+}
+
+export async function categoryExists(
+  categoryId: number
+): Promise<boolean> {
+  const [rows] = await pool.execute(
+    `
+    SELECT id
+    FROM categories
+    WHERE id = ?
+    `,
+    [categoryId]
+  );
+
+  const categories = rows as { id: number }[];
+
+  return categories.length > 0;
 }
