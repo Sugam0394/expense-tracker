@@ -22,7 +22,7 @@ export const getExpenseById = async (
   input: CreateExpenseInput
 ): Promise<ApiResponse<Expense>> => {
   const response = await apiClient.post<ApiResponse<Expense>>(
-    "/api/expenses",
+    "/api/create",
     input
   );
 
