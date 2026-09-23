@@ -19,6 +19,8 @@ interface ExpenseFormProps {
   formData: ExpenseFormData;
   formErrors: FormErrors;
   isSubmitting: boolean;
+  mode: "create" | "edit";
+  onCancelEdit: () => void;
   onChange: (
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
@@ -29,6 +31,8 @@ function ExpenseForm({
   formData,
   formErrors,
   isSubmitting,
+  mode,
+  onCancelEdit,
   onChange,
   onSubmit,
 }: ExpenseFormProps) {
@@ -116,8 +120,24 @@ function ExpenseForm({
       )}
 
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Adding..." : "Add Expense"}
+        {isSubmitting
+          ? mode === "edit"
+            ? "Saving..."
+            : "Adding..."
+          : mode === "edit"
+            ? "Save Expense"
+            : "Add Expense"}
       </button>
+
+      {mode === "edit" && (
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </button>
+      )}
     </form>
   );
 }
