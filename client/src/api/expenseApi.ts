@@ -39,7 +39,7 @@ export const updateExpense = async (
   input: UpdateExpenseInput
 ): Promise<ApiResponse<Expense>> => {
   const response = await apiClient.put<ApiResponse<Expense>>(
-    `/api/expenses/${id}`,
+    `/api/update/${id}`,
     input
   );
 
@@ -50,7 +50,7 @@ export const updateExpense = async (
   id: number
 ): Promise<ApiResponse<null>> => {
   const response = await apiClient.delete<ApiResponse<null>>(
-    `/api/expenses/${id}`
+    `/api/delete/${id}`
   );
 
   return response.data;

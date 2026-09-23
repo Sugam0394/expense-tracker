@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 
-import { createExpense, getExpenses } from "../api/expenseApi";
+import { createExpense, getExpenses, getExpenseById } from "../api/expenseApi";
 
 import ExpenseForm from "../components/ExpenseForm/ExpenseForm";
 import ExpenseList from "../components/ExpenseList/ExpenseList";
@@ -32,6 +32,9 @@ const initialFormData: ExpenseFormData = {
 
 function ExpensePage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+
+  const [ selectedExpense, setSelectedExpense] =
+  useState<Expense | null>(null);
 
   const [formData, setFormData] =
     useState<ExpenseFormData>(initialFormData);
@@ -178,6 +181,18 @@ function ExpensePage() {
     }
   };
 
+ const handleEdit = async (id: number) => {
+  try {
+    const response = await getExpenseById(id);
+
+    if (response.success && response.data) {
+      setSelectedExpense(response.data);
+    }
+  } catch (error) {
+    console.error("Failed to load expense:", error);
+  }
+};
+
   return (
     <main>
       <h1>Expense Tracker</h1>
@@ -190,6 +205,12 @@ function ExpensePage() {
   onSubmit={handleSubmit}
 />
 
+      {selectedExpense && (
+        <p>
+          Selected expense: {selectedExpense.description}
+        </p>
+      )}
+
       {successMessage && <p>{successMessage}</p>}
 
       <hr />
@@ -199,7 +220,10 @@ function ExpensePage() {
       {loadError && <p>{loadError}</p>}
 
       {!isLoading && !loadError && (
-        <ExpenseList expenses={expenses} />
+        <ExpenseList
+  expenses={expenses}
+  onEdit={handleEdit}
+/>
       )}
     </main>
   );

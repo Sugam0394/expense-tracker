@@ -1,10 +1,11 @@
-import type { Expense } from "../../types/expense";
+ import type { Expense } from "../../types/expense";
 
 interface ExpenseListProps {
   expenses: Expense[];
+  onEdit: (id: number) => void;
 }
 
-function ExpenseList({ expenses }: ExpenseListProps) {
+function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
       <section>
@@ -35,6 +36,10 @@ function ExpenseList({ expenses }: ExpenseListProps) {
           <p>
             <strong>Date:</strong> {expense.date}
           </p>
+
+          <button onClick={() => onEdit(expense.id)}>
+            Edit
+          </button>
         </article>
       ))}
     </section>
