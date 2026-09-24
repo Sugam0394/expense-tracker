@@ -1,5 +1,4 @@
- 
-import { useEffect, useState } from "react";
+ import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 
 import {
@@ -14,6 +13,7 @@ import ExpenseForm from "../components/ExpenseForm/ExpenseForm";
 import ExpenseList from "../components/ExpenseList/ExpenseList";
 
 import type { Expense } from "../types/expense";
+import type { ExpenseFilters } from "../types/expense";
 
 interface ExpenseFormData {
   amount: string;
@@ -37,24 +37,6 @@ const initialFormData: ExpenseFormData = {
   categoryId: "",
 };
 
-/*
-  Backend returns category name:
-
-  "Food"
-  "Transport"
-  "Shopping"
-  etc.
-
-  But the form select works with category IDs:
-
-  "1"
-  "2"
-  "3"
-  etc.
-
-  This map converts the backend category name
-  into the value expected by the form.
-*/
 const categoryMap: Record<string, string> = {
   Food: "1",
   Transport: "2",
@@ -69,14 +51,9 @@ function ExpensePage() {
      STATE
      ===================================================== */
 
-  const [expenses, setExpenses] =
-    useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [filters, setFilters] = useState<ExpenseFilters>({});
 
-  /*
-    null  → create mode
-
-    Expense → edit mode
-  */
   const [selectedExpense, setSelectedExpense] =
     useState<Expense | null>(null);
 
@@ -98,48 +75,31 @@ function ExpensePage() {
   const [loadError, setLoadError] =
     useState("");
 
+  const [filterForm, setFilterForm] = useState({
+    categoryId: "",
+    minAmount: "",
+    maxAmount: "",
+  });
+
   /* =====================================================
-     LOAD ALL EXPENSES
+     LOAD EXPENSES (WITH CURRENT FILTERS)
      ===================================================== */
 
-  const loadExpenses = async () => {
+  const loadExpenses = async (currentFilters: ExpenseFilters = filters) => {
     try {
       setIsLoading(true);
       setLoadError("");
 
-      const response = await getExpenses();
+      const response = await getExpenses(currentFilters);
 
       if (response.success) {
-        const loadedExpenses =
-          response.data ?? [];
-
+        const loadedExpenses = response.data ?? [];
         setExpenses(loadedExpenses);
 
-        /*
-          STALE EDIT PROTECTION
-
-          If we are currently editing an expense,
-          check whether that expense still exists
-          after refreshing the list.
-
-          Example:
-
-          selectedExpense.id = 55
-
-          Refresh happens
-
-          Backend no longer returns id 55
-
-          Therefore:
-          → exit edit mode
-          → reset form
-        */
         if (selectedExpense) {
-          const stillExists =
-            loadedExpenses.some(
-              (expense) =>
-                expense.id === selectedExpense.id
-            );
+          const stillExists = loadedExpenses.some(
+            (expense) => expense.id === selectedExpense.id
+          );
 
           if (!stillExists) {
             setSelectedExpense(null);
@@ -149,14 +109,8 @@ function ExpensePage() {
         }
       }
     } catch (error) {
-      console.error(
-        "Failed to load expenses:",
-        error
-      );
-
-      setLoadError(
-        "Failed to load expenses. Please try again."
-      );
+      console.error("Failed to load expenses:", error);
+      setLoadError("Failed to load expenses. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -168,13 +122,47 @@ function ExpensePage() {
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      void loadExpenses();
+      void loadExpenses({});
     }, 0);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
   }, []);
+
+  /* =====================================================
+     APPLY & CLEAR FILTER HANDLERS
+     ===================================================== */
+
+  const handleApplyFilters = async () => {
+    const newFilters: ExpenseFilters = {};
+
+    if (filterForm.categoryId !== "") {
+      newFilters.category_id = Number(filterForm.categoryId);
+    }
+
+    if (filterForm.minAmount !== "") {
+      newFilters.min_amount = Number(filterForm.minAmount);
+    }
+
+    if (filterForm.maxAmount !== "") {
+      newFilters.max_amount = Number(filterForm.maxAmount);
+    }
+
+    setFilters(newFilters);
+    await loadExpenses(newFilters);
+  };
+
+  const handleClearFilters = async () => {
+    setFilterForm({
+      categoryId: "",
+      minAmount: "",
+      maxAmount: "",
+    });
+
+    setFilters({});
+    await loadExpenses({});
+  };
 
   /* =====================================================
      PREFILL FORM WHEN EDITING
@@ -185,24 +173,11 @@ function ExpensePage() {
       return;
     }
 
-    /*
-      Convert backend response into
-      the shape required by ExpenseForm.
-    */
-
     setFormData({
       amount: selectedExpense.amount,
-
-      description:
-        selectedExpense.description,
-
-      date:
-        selectedExpense.date.slice(0, 10),
-
-      categoryId:
-        categoryMap[
-          selectedExpense.category
-        ] ?? "",
+      description: selectedExpense.description,
+      date: selectedExpense.date.slice(0, 10),
+      categoryId: categoryMap[selectedExpense.category] ?? "",
     });
 
     setFormErrors({});
@@ -214,12 +189,9 @@ function ExpensePage() {
      ===================================================== */
 
   const handleChange = (
-    event: ChangeEvent<
-      HTMLInputElement | HTMLSelectElement
-    >
+    event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } =
-      event.target;
+    const { name, value } = event.target;
 
     setFormData((previous) => ({
       ...previous,
@@ -241,42 +213,28 @@ function ExpensePage() {
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
-
-    const amount = Number(
-      formData.amount
-    );
+    const amount = Number(formData.amount);
 
     if (!formData.amount) {
-      errors.amount =
-        "Amount is required.";
-    } else if (
-      Number.isNaN(amount) ||
-      amount <= 0
-    ) {
-      errors.amount =
-        "Amount must be greater than 0.";
+      errors.amount = "Amount is required.";
+    } else if (Number.isNaN(amount) || amount <= 0) {
+      errors.amount = "Amount must be greater than 0.";
     }
 
     if (!formData.description.trim()) {
-      errors.description =
-        "Description is required.";
+      errors.description = "Description is required.";
     }
 
     if (!formData.date) {
-      errors.date =
-        "Date is required.";
+      errors.date = "Date is required.";
     }
 
     if (!formData.categoryId) {
-      errors.categoryId =
-        "Category is required.";
+      errors.categoryId = "Category is required.";
     }
 
     setFormErrors(errors);
-
-    return (
-      Object.keys(errors).length === 0
-    );
+    return Object.keys(errors).length === 0;
   };
 
   /* =====================================================
@@ -288,9 +246,6 @@ function ExpensePage() {
   ) => {
     event.preventDefault();
 
-    /*
-      Stop here if validation fails.
-    */
     if (!validateForm()) {
       return;
     }
@@ -298,33 +253,12 @@ function ExpensePage() {
     try {
       setIsSubmitting(true);
 
-      /*
-        Convert form data into API data.
-      */
-
       const expenseData = {
         amount: formData.amount,
-
-        description:
-          formData.description.trim(),
-
+        description: formData.description.trim(),
         date: formData.date,
-
-        categoryId:
-          Number(formData.categoryId),
+        categoryId: Number(formData.categoryId),
       };
-
-      /*
-        CREATE vs UPDATE
-
-        selectedExpense === null
-              ↓
-            CREATE
-
-        selectedExpense !== null
-              ↓
-             UPDATE
-      */
 
       let response;
 
@@ -334,62 +268,27 @@ function ExpensePage() {
           expenseData
         );
       } else {
-        response =
-          await createExpense(
-            expenseData
-          );
+        response = await createExpense(expenseData);
       }
 
-      /* =================================================
-         SUCCESS
-         ================================================= */
-
       if (response.success) {
-        /*
-          Reset form.
-        */
-        setFormData(
-          initialFormData
-        );
-
+        setFormData(initialFormData);
         setFormErrors({});
-
-        /*
-          Leave edit mode.
-
-          This is important because
-          after updating we don't want
-          the form to continue thinking
-          it is editing the old expense.
-        */
         setSelectedExpense(null);
-
-        /*
-          Different message depending
-          on the operation.
-        */
         setSuccessMessage(
           selectedExpense
             ? "Expense updated successfully."
             : "Expense added successfully."
         );
-
-        /*
-          Refresh the list from backend.
-        */
-        await loadExpenses();
+        // Refresh preserving the current active filters
+        await loadExpenses(filters);
       } else {
         setFormErrors({
-          general:
-            response.message ||
-            "Failed to save expense.",
+          general: response.message || "Failed to save expense.",
         });
       }
     } catch (error: unknown) {
-      console.error(
-        "Failed to save expense:",
-        error
-      );
+      console.error("Failed to save expense:", error);
 
       const message =
         error instanceof Error
@@ -405,102 +304,62 @@ function ExpensePage() {
   };
 
   /* =====================================================
-     EDIT EXPENSE
+     DELETE / EDIT / CANCEL
      ===================================================== */
- const handleDelete = async (id: number) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this expense?"
-  );
 
-  if (!confirmed) {
-    return;
-  }
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this expense?"
+    );
 
-  try {
-    const response = await deleteExpense(id);
-
-    if (response.success) {
-      setSuccessMessage("Expense deleted successfully.");
-      await loadExpenses();
+    if (!confirmed) {
+      return;
     }
-  } catch (error) {
-    console.error("Failed to delete expense:", error);
-  }
-};
-  const handleEdit = async (
-    id: number
-  ) => {
+
+    try {
+      const response = await deleteExpense(id);
+
+      if (response.success) {
+        setSuccessMessage("Expense deleted successfully.");
+        await loadExpenses(filters);
+      }
+    } catch (error) {
+      console.error("Failed to delete expense:", error);
+    }
+  };
+
+  const handleEdit = async (id: number) => {
     try {
       setFormErrors({});
       setSuccessMessage("");
 
-      const response =
-        await getExpenseById(id);
+      const response = await getExpenseById(id);
 
-      if (
-        response.success &&
-        response.data
-      ) {
-        setSelectedExpense(
-          response.data
-        );
+      if (response.success && response.data) {
+        setSelectedExpense(response.data);
       } else {
         setFormErrors({
-          general:
-            response.message ||
-            "Failed to load expense.",
+          general: response.message || "Failed to load expense.",
         });
       }
     } catch (error) {
-      console.error(
-        "Failed to load expense:",
-        error
-      );
-
+      console.error("Failed to load expense:", error);
       setFormErrors({
-        general:
-          "Failed to load expense. Please try again.",
+        general: "Failed to load expense. Please try again.",
       });
     }
   };
 
-  /* =====================================================
-     CANCEL EDIT
-     ===================================================== */
-
   const handleCancelEdit = () => {
-    /*
-      Remove selected expense.
-      This automatically changes:
-
-      edit → create
-    */
     setSelectedExpense(null);
-
-    /*
-      Reset form.
-    */
     setFormData(initialFormData);
-
-    /*
-      Clear validation errors.
-    */
     setFormErrors({});
-
-    /*
-      Clear success message.
-    */
     setSuccessMessage("");
   };
 
-  /* =====================================================
-     FORM MODE
-     ===================================================== */
-
-  const formMode: "create" | "edit" =
-    selectedExpense
-      ? "edit"
-      : "create";
+  const formMode: "create" | "edit" = selectedExpense
+    ? "edit"
+    : "create";
 
   /* =====================================================
      UI
@@ -522,35 +381,91 @@ function ExpensePage() {
 
       {selectedExpense && (
         <p>
-          Editing:{" "}
-          {selectedExpense.description}
+          Editing: {selectedExpense.description}
         </p>
       )}
 
-      {successMessage && (
-        <p>{successMessage}</p>
-      )}
+      {successMessage && <p>{successMessage}</p>}
 
       <hr />
 
-      {isLoading && (
-        <p>
-          Loading expenses...
-        </p>
-      )}
+      {/* =====================================================
+          FILTER SECTION
+          ===================================================== */}
+      <section style={{ marginBottom: "20px", padding: "10px", background: "#f9f9f9", borderRadius: "5px" }}>
+        <h3>Filter Expenses</h3>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "12px" }}>Category</label>
+            <select
+              value={filterForm.categoryId}
+              onChange={(e) =>
+                setFilterForm({
+                  ...filterForm,
+                  categoryId: e.target.value,
+                })
+              }
+            >
+              <option value="">All Categories</option>
+              <option value="1">Food</option>
+              <option value="2">Transport</option>
+              <option value="3">Shopping</option>
+              <option value="4">Bills</option>
+              <option value="5">Entertainment</option>
+              <option value="6">Other</option>
+            </select>
+          </div>
 
-      {loadError && (
-        <p>{loadError}</p>
-      )}
+          <div>
+            <label style={{ display: "block", fontSize: "12px" }}>Minimum Amount</label>
+            <input
+              type="number"
+              placeholder="Min amount"
+              value={filterForm.minAmount}
+              onChange={(e) =>
+                setFilterForm({
+                  ...filterForm,
+                  minAmount: e.target.value,
+                })
+              }
+            />
+          </div>
 
-      {!isLoading &&
-        !loadError && (
-          <ExpenseList
-            expenses={expenses}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        )}
+          <div>
+            <label style={{ display: "block", fontSize: "12px" }}>Maximum Amount</label>
+            <input
+              type="number"
+              placeholder="Max amount"
+              value={filterForm.maxAmount}
+              onChange={(e) =>
+                setFilterForm({
+                  ...filterForm,
+                  maxAmount: e.target.value,
+                })
+              }
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={handleApplyFilters}>Apply Filters</button>
+          <button onClick={handleClearFilters}>Clear Filters</button>
+        </div>
+      </section>
+
+      <hr />
+
+      {isLoading && <p>Loading expenses...</p>}
+
+      {loadError && <p>{loadError}</p>}
+
+      {!isLoading && !loadError && (
+        <ExpenseList
+          expenses={expenses}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
     </main>
   );
 }

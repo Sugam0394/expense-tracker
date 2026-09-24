@@ -40,4 +40,11 @@ export interface ExpenseListResponse {
   data: ExpenseResponse[];
 }
 
+export interface ExpenseFilters {
+  category_id?: number;
+  min_amount?: number;
+  max_amount?: number;
+  search?: string;
+}
+
 

@@ -19,3 +19,10 @@ export interface UpdateExpenseInput {
   date: string;
   categoryId: number;
 }
+
+export interface ExpenseFilters {
+  category_id?: number;
+  min_amount?: number;
+  max_amount?: number;
+  search?: string;
+}

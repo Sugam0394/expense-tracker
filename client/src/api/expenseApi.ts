@@ -1,9 +1,21 @@
-import apiClient from "./apiClient";
+ import apiClient from "./apiClient";
 import type { ApiResponse } from "../types/api";
 import type { Expense, UpdateExpenseInput, CreateExpenseInput } from "../types/expense";
+import type { ExpenseFilters } from "../types/expense";
 
-export const getExpenses = async (): Promise<ApiResponse<Expense[]>> => {
-  const response = await apiClient.get<ApiResponse<Expense[]>>("/api/expenses");
+export const getExpenses = async (
+  filters: ExpenseFilters = {}
+): Promise<ApiResponse<Expense[]>> => {
+  const params = {
+    category_id: filters.category_id,
+    min_amount: filters.min_amount,
+    max_amount: filters.max_amount,
+    search: filters.search,
+  };
+
+  const response = await apiClient.get<ApiResponse<Expense[]>>("/api/expenses", {
+    params,
+  });
 
   return response.data;
 };
@@ -18,7 +30,7 @@ export const getExpenseById = async (
   return response.data;
 };
 
- export const createExpense = async (
+export const createExpense = async (
   input: CreateExpenseInput
 ): Promise<ApiResponse<Expense>> => {
   const response = await apiClient.post<ApiResponse<Expense>>(
@@ -34,7 +46,7 @@ export const getExpenseById = async (
   return response.data;
 };
 
- export const updateExpense = async (
+export const updateExpense = async (
   id: number,
   input: UpdateExpenseInput
 ): Promise<ApiResponse<Expense>> => {
@@ -51,7 +63,7 @@ export const getExpenseById = async (
   return response.data;
 };
 
- export const deleteExpense = async (
+export const deleteExpense = async (
   id: number
 ): Promise<ApiResponse<null>> => {
   const response = await apiClient.delete<ApiResponse<null>>(

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { ExpenseListResponse , ExpenseResponse, SingleExpenseResponse } from "../types/expense.js";
+import type { ExpenseListResponse , ExpenseResponse, SingleExpenseResponse, ExpenseFilters } from "../types/expense.js";
 import {
   createExpenseService,
   getExpensesService,
@@ -48,12 +48,32 @@ export const createExpenseController = async (
 };
  
  // Get all expenses
-export const getExpensesController = async (
+ export const getExpensesController = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const expenses = await getExpensesService();
+    const {
+      category_id,
+      min_amount,
+      max_amount
+    } = req.query;
+
+    const filters: ExpenseFilters = {};
+
+    if (category_id !== undefined) {
+      filters.category_id = Number(category_id);
+    }
+
+    if (min_amount !== undefined) {
+      filters.min_amount = Number(min_amount);
+    }
+
+    if (max_amount !== undefined) {
+      filters.max_amount = Number(max_amount);
+    }
+
+    const expenses = await getExpensesService(filters);
 
     const responseData: ExpenseResponse[] = expenses.map((expense) => ({
       id: expense.id,
@@ -72,13 +92,19 @@ export const getExpensesController = async (
   } catch (error) {
     console.error("Error fetching expenses:", error);
 
+    if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch expenses",
     });
   }
 };
-
 // Get expense by ID
 export const getExpenseByIdController = async (
   req: Request,

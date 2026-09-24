@@ -1,5 +1,5 @@
 import pool from "../config/database.js";
-import type { Expense , CreateExpenseInput , UpdateExpenseInput } from "../types/expense.js";
+import type { Expense , CreateExpenseInput , UpdateExpenseInput, ExpenseFilters } from "../types/expense.js";
 
 
 
@@ -7,8 +7,10 @@ export const getExpensesService = async (): Promise<Expense[]> => {
   return await getExpenses();
 };
 
-export async function getExpenses(): Promise<Expense[]> {
-  const [rows] = await pool.execute(`
+ export async function getExpenses(
+  filters: ExpenseFilters = {}
+): Promise<Expense[]> {
+  let query = `
     SELECT
       expenses.id,
       expenses.amount,
@@ -18,7 +20,31 @@ export async function getExpenses(): Promise<Expense[]> {
     FROM expenses
     JOIN categories
       ON expenses.category_id = categories.id
-  `);
+  `;
+
+  const conditions: string[] = [];
+  const values: (number | string)[] = [];
+
+  if (filters.category_id !== undefined) {
+    conditions.push("expenses.category_id = ?");
+    values.push(filters.category_id);
+  }
+
+  if (filters.min_amount !== undefined) {
+    conditions.push("expenses.amount >= ?");
+    values.push(filters.min_amount);
+  }
+
+  if (filters.max_amount !== undefined) {
+    conditions.push("expenses.amount <= ?");
+    values.push(filters.max_amount);
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(" AND ")}`;
+  }
+
+  const [rows] = await pool.execute(query, values);
 
   return rows as Expense[];
 }

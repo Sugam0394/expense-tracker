@@ -11,6 +11,7 @@ import type {
   CreateExpenseInput,
   UpdateExpenseInput,
   Expense,
+  ExpenseFilters
 } from "../types/expense.js";
 
 // Create expense
@@ -48,8 +49,41 @@ import type {
 };
 
 // Get all expenses
-export const getExpensesService = async (): Promise<Expense[]> => { 
-  return await getExpenses();
+ export const getExpensesService = async (
+  filters: ExpenseFilters = {}
+): Promise<Expense[]> => {
+  if (
+    filters.category_id !== undefined &&
+    (!Number.isInteger(filters.category_id) || filters.category_id <= 0)
+  ) {
+    throw new Error("Invalid category ID");
+  }
+
+  if (
+    filters.min_amount !== undefined &&
+    filters.min_amount < 0
+  ) {
+    throw new Error("Minimum amount cannot be negative");
+  }
+
+  if (
+    filters.max_amount !== undefined &&
+    filters.max_amount < 0
+  ) {
+    throw new Error("Maximum amount cannot be negative");
+  }
+
+  if (
+    filters.min_amount !== undefined &&
+    filters.max_amount !== undefined &&
+    filters.min_amount > filters.max_amount
+  ) {
+    throw new Error(
+      "Minimum amount cannot be greater than maximum amount"
+    );
+  }
+
+  return await getExpenses(filters);
 };
 
 // Get expense by ID
