@@ -34,13 +34,18 @@ export const getExpenseById = async (
   return response.data;
 };
 
-export const updateExpense = async (
+ export const updateExpense = async (
   id: number,
   input: UpdateExpenseInput
 ): Promise<ApiResponse<Expense>> => {
   const response = await apiClient.put<ApiResponse<Expense>>(
     `/api/update/${id}`,
-    input
+    {
+      amount: input.amount,
+      description: input.description,
+      date: input.date,
+      category_id: input.categoryId,
+    }
   );
 
   return response.data;

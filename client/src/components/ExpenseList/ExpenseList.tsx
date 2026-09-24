@@ -1,11 +1,12 @@
  import type { Expense } from "../../types/expense";
 
-interface ExpenseListProps {
+ interface ExpenseListProps {
   expenses: Expense[];
   onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
-function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
+function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
       <section>
@@ -40,6 +41,9 @@ function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
           <button onClick={() => onEdit(expense.id)}>
             Edit
           </button>
+          <button onClick={() => onDelete(expense.id)}>
+  Delete
+</button>
         </article>
       ))}
     </section>

@@ -7,6 +7,7 @@ import {
   getExpenses,
   getExpenseById,
   updateExpense,
+  deleteExpense
 } from "../api/expenseApi";
 
 import ExpenseForm from "../components/ExpenseForm/ExpenseForm";
@@ -406,7 +407,26 @@ function ExpensePage() {
   /* =====================================================
      EDIT EXPENSE
      ===================================================== */
+ const handleDelete = async (id: number) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this expense?"
+  );
 
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await deleteExpense(id);
+
+    if (response.success) {
+      setSuccessMessage("Expense deleted successfully.");
+      await loadExpenses();
+    }
+  } catch (error) {
+    console.error("Failed to delete expense:", error);
+  }
+};
   const handleEdit = async (
     id: number
   ) => {
@@ -528,6 +548,7 @@ function ExpensePage() {
           <ExpenseList
             expenses={expenses}
             onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         )}
     </main>
