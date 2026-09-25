@@ -8,6 +8,17 @@ import {
   deleteExpenseService,
 } from "../services/expense.service.js";
 
+const parseExpenseId = (req: Request): number => {
+  const rawId = req.params.id;
+  const id = Number(rawId);
+
+  if (!rawId || !Number.isInteger(id) || id <= 0) {
+    throw new Error(`Invalid expense ID: ${rawId ?? "missing"}`);
+  }
+
+  return id;
+};
+
 
 
 // Create expense
@@ -111,7 +122,7 @@ export const getExpenseByIdController = async (
   res: Response
 ) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseExpenseId(req);
 
     const expense = await getExpenseByIdService(id);
 
@@ -162,7 +173,7 @@ export const updateExpenseController = async (
   res: Response
 ) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseExpenseId(req);
     const expense = req.body;
 
     const updatedExpense = await updateExpenseService(id, expense);
@@ -206,7 +217,7 @@ export const deleteExpenseController = async (
   res: Response
 ) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseExpenseId(req);
 
     const deletedExpense = await deleteExpenseService(id);
 
