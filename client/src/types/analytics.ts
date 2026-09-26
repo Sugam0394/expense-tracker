@@ -3,16 +3,7 @@ export interface ExpenseSummary {
   expenseCount: number;
 }
 
-
 export interface CategorySummary {
   category: string;
   totalAmount: string;
-}
-
-
- export interface AnalyticsFilters {
-  categoryId?: number;
-  minAmount?: number;
-  maxAmount?: number;
-  search?: string;
 }

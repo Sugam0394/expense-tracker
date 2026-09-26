@@ -11,6 +11,7 @@ import {
 
 import ExpenseForm from "../components/ExpenseForm/ExpenseForm";
 import ExpenseList from "../components/ExpenseList/ExpenseList";
+import ExpenseAnalytics from "../components/ExpenseAnalytics/ExpenseAnalytics";
 
 import type { Expense } from "../types/expense";
 import type { ExpenseFilters } from "../types/expense";
@@ -368,7 +369,11 @@ function ExpensePage() {
   return (
     <main>
       <h1>Expense Tracker</h1>
+    
 
+      <ExpenseAnalytics />
+
+      
       <ExpenseForm
         formData={formData}
         formErrors={formErrors}
