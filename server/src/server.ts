@@ -3,6 +3,10 @@ import express from "express";
 import cors from "cors";
 import expressRoutes from "./routes/expenseRoutes.js";
 import expenseAnalyticsRoutes from "./routes/expensesAnalyticsRoutes.js";
+import {errorHandler} from "./middlewares/errorHandler.js";
+
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,17 +33,7 @@ app.get("/", (_req, res) => {
 app.use("/api/expenses", expenseAnalyticsRoutes);
 app.use("/api", expressRoutes);
 
-
-
-
-
-
-
-
-
-
-
-
+app.use(errorHandler);
 
 
 app.listen(PORT, () => {

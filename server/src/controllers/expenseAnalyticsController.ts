@@ -1,12 +1,14 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type {
   AnalyticsFilters,
 } from "../types/analytics.js";
 import { getExpenseSummaryService, getCategorySummaryService } from "../services/expenseAnalyticsService.js";
+import { AppError } from "../errors/AppError.js";
 
  export async function getExpenseSummaryController(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) {
   try {
     const { category_id, min_amount, max_amount, search } = req.query;
@@ -17,10 +19,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       const categoryId = Number(category_id);
 
       if (!Number.isInteger(categoryId) || categoryId <= 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid category_id",
-        });
+        throw new AppError("Invalid category_id", 400);
       }
 
       filters.categoryId = categoryId;
@@ -30,10 +29,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       const minAmount = Number(min_amount);
 
       if (!Number.isFinite(minAmount) || minAmount < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid min_amount",
-        });
+        throw new AppError("Invalid min_amount", 400);
       }
 
       filters.minAmount = minAmount;
@@ -43,10 +39,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       const maxAmount = Number(max_amount);
 
       if (!Number.isFinite(maxAmount) || maxAmount < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid max_amount",
-        });
+        throw new AppError("Invalid max_amount", 400);
       }
 
       filters.maxAmount = maxAmount;
@@ -54,10 +47,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
 
     if (search !== undefined) {
   if (typeof search !== "string") {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid search",
-    });
+    throw new AppError("Invalid search", 400);
   }
 
   filters.search = search;
@@ -70,18 +60,14 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       data: summary,
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get expense summary",
-    });
+    next(error);
   }
 }
 
  export async function getCategorySummaryController(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) {
   try {
     const {
@@ -97,10 +83,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       const categoryId = Number(category_id);
 
       if (!Number.isInteger(categoryId) || categoryId <= 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid category_id",
-        });
+        throw new AppError("Invalid category_id", 400);
       }
 
       filters.categoryId = categoryId;
@@ -110,10 +93,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       const minAmount = Number(min_amount);
 
       if (!Number.isFinite(minAmount) || minAmount < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid min_amount",
-        });
+        throw new AppError("Invalid min_amount", 400);
       }
 
       filters.minAmount = minAmount;
@@ -123,10 +103,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       const maxAmount = Number(max_amount);
 
       if (!Number.isFinite(maxAmount) || maxAmount < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid max_amount",
-        });
+        throw new AppError("Invalid max_amount", 400);
       }
 
       filters.maxAmount = maxAmount;
@@ -134,10 +111,7 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
 
     if (search !== undefined) {
       if (typeof search !== "string") {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid search",
-        });
+        throw new AppError("Invalid search", 400);
       }
 
       filters.search = search;
@@ -150,11 +124,6 @@ import { getExpenseSummaryService, getCategorySummaryService } from "../services
       data: summary,
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to get category summary",
-    });
+    next(error);
   }
 }

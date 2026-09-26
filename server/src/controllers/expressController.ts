@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { ExpenseListResponse , ExpenseResponse, SingleExpenseResponse, ExpenseFilters } from "../types/expense.js";
 import {
   createExpenseService,
@@ -7,24 +7,25 @@ import {
   updateExpenseService,
   deleteExpenseService,
 } from "../services/expense.service.js";
+import { AppError } from "../errors/AppError.js";
 
 const parseExpenseId = (req: Request): number => {
   const rawId = req.params.id;
   const id = Number(rawId);
 
   if (!rawId || !Number.isInteger(id) || id <= 0) {
-    throw new Error(`Invalid expense ID: ${rawId ?? "missing"}`);
+    throw new AppError(`Invalid expense ID: ${rawId ?? "missing"}`, 400);
   }
 
   return id;
 };
 
 
-
 // Create expense
 export const createExpenseController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const expense = req.body;
@@ -39,29 +40,15 @@ export const createExpenseController = async (
       },
     });
   } catch (error) {
-    console.error("Error creating expense:", error);
-
-
-        if (error instanceof Error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to create expense",
-    });
+    next(error);
   }
 };
  
  // Get all expenses
  export const getExpensesController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const {
@@ -101,37 +88,19 @@ export const createExpenseController = async (
 
     res.status(200).json(response);
   } catch (error) {
-    console.error("Error fetching expenses:", error);
-
-    if (error instanceof Error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch expenses",
-    });
+    next(error);
   }
 };
 // Get expense by ID
 export const getExpenseByIdController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const id = parseExpenseId(req);
 
     const expense = await getExpenseByIdService(id);
-
-    if (!expense) {
-      return res.status(404).json({
-        success: false,
-        message: "Expense not found",
-      });
-    }
 
     const responseData: ExpenseResponse = {
       id: expense.id,
@@ -149,41 +118,21 @@ export const getExpenseByIdController = async (
 
 res.status(200).json(response);
   } catch (error) {
-    console.error("Error fetching expense:", error);
-
-
-     if (error instanceof Error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch expense",
-    });
+    next(error);
   }
 };
 
  // Update expense
 export const updateExpenseController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const id = parseExpenseId(req);
     const expense = req.body;
 
     const updatedExpense = await updateExpenseService(id, expense);
-
-    if (!updatedExpense) {
-      return res.status(404).json({
-        success: false,
-        message: "Expense not found",
-      });
-    }
 
     res.status(200).json({
       success: true,
@@ -196,56 +145,25 @@ export const updateExpenseController = async (
       },
     });
   } catch (error) {
-    console.error("Error updating expense:", error);
-
-    if (error instanceof Error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to update expense",
-    });
+    next(error);
   }
 };
 // Delete expense
 export const deleteExpenseController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const id = parseExpenseId(req);
 
-    const deletedExpense = await deleteExpenseService(id);
-
-    if (!deletedExpense) {
-      return res.status(404).json({
-        success: false,
-        message: "Expense not found",
-      });
-    }
+    await deleteExpenseService(id);
 
     res.status(200).json({
       success: true,
       message: "Expense deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting expense:", error);
-
-
-       if (error instanceof Error) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete expense",
-    });
+    next(error);
   }
 };
