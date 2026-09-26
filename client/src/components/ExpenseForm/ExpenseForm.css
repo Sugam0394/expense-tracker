@@ -1,0 +1,286 @@
+ 
+
+.expense-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 20px;
+
+  margin-top: 32px;
+  padding: 28px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+
+/* =========================================================
+   FORM FIELD
+   ========================================================= */
+
+.expense-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expense-form__field label {
+  color: #0f172a;
+
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.expense-form__field input,
+.expense-form__field select {
+  width: 100%;
+  height: 48px;
+
+  padding: 0 14px;
+
+  color: #0f172a;
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  outline: none;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.expense-form__field input::placeholder {
+  color: #94a3b8;
+}
+
+.expense-form__field input:hover:not(:focus),
+.expense-form__field select:hover:not(:focus) {
+  border-color: #cbd5e1;
+}
+
+.expense-form__field input:focus,
+.expense-form__field select:focus {
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.expense-form__field input:disabled,
+.expense-form__field select:disabled {
+  cursor: not-allowed;
+
+  background: #f8fafc;
+  opacity: 0.7;
+}
+
+
+/* =========================================================
+   FIELD ERROR
+   ========================================================= */
+
+.expense-form__error {
+  margin: 0;
+
+  color: #dc2626;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   GENERAL ERROR
+   ========================================================= */
+
+.expense-form__general-error {
+  grid-column: 1 / -1;
+
+  margin: 0;
+  padding: 12px 14px;
+
+  color: #b91c1c;
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.expense-form__actions {
+  grid-column: 1 / -1;
+
+  display: flex;
+  gap: 12px;
+
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.expense-form__submit,
+.expense-form__cancel {
+  min-height: 48px;
+
+  padding: 0 20px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+
+/* =========================================================
+   SUBMIT
+   ========================================================= */
+
+.expense-form__submit {
+  flex: 1;
+
+  color: #ffffff;
+  background: #2563eb;
+
+  border: 1px solid #2563eb;
+
+  box-shadow:
+    0 6px 14px rgba(37, 99, 235, 0.18);
+}
+
+.expense-form__submit:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 8px 18px rgba(37, 99, 235, 0.24);
+}
+
+.expense-form__submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   CANCEL
+   ========================================================= */
+
+.expense-form__cancel {
+  min-width: 110px;
+
+  color: #475569;
+  background: #ffffff;
+
+  border: 1px solid #cbd5e1;
+}
+
+.expense-form__cancel:hover:not(:disabled) {
+  color: #0f172a;
+  background: #f8fafc;
+
+  border-color: #94a3b8;
+}
+
+.expense-form__cancel:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+/* =========================================================
+   DISABLED
+   ========================================================= */
+
+.expense-form__submit:disabled,
+.expense-form__cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .expense-form {
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+
+    padding: 20px;
+  }
+
+  .expense-form__actions {
+    flex-direction: column;
+  }
+
+  .expense-form__submit,
+  .expense-form__cancel {
+    width: 100%;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .expense-form {
+    margin-top: 24px;
+    padding: 16px;
+
+    border-radius: 14px;
+  }
+
+  .expense-form__field input,
+  .expense-form__field select {
+    height: 46px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .expense-form__submit,
+  .expense-form__cancel,
+  .expense-form__field input,
+  .expense-form__field select {
+    transition: none;
+  }
+}
+ 

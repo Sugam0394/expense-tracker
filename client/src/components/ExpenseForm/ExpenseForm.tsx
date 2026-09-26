@@ -1,4 +1,6 @@
 import type { ChangeEvent, FormEvent } from "react";
+import "./ExpenseForm.css";
+
 
 interface ExpenseFormData {
   amount: string;
@@ -37,8 +39,8 @@ function ExpenseForm({
   onSubmit,
 }: ExpenseFormProps) {
   return (
-    <form onSubmit={onSubmit}>
-      <div>
+     <form className="expense-form" onSubmit={onSubmit}>
+      <div className="expense-form__field">
         <label htmlFor="amount">Amount</label>
 
         <input
@@ -56,7 +58,7 @@ function ExpenseForm({
         )}
       </div>
 
-      <div>
+      <div className="expense-form__field">
         <label htmlFor="description">Description</label>
 
         <input
@@ -74,7 +76,7 @@ function ExpenseForm({
         )}
       </div>
 
-      <div>
+      <div className="expense-form__field">
         <label htmlFor="date">Date</label>
 
         <input
