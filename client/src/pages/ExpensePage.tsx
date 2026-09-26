@@ -254,12 +254,12 @@ function ExpensePage() {
     try {
       setIsSubmitting(true);
 
-      const expenseData = {
-        amount: formData.amount,
-        description: formData.description.trim(),
-        date: formData.date,
-        categoryId: Number(formData.categoryId),
-      };
+   const expenseData = {
+  amount: Number(formData.amount),
+  description: formData.description.trim(),
+  date: formData.date,
+  categoryId: Number(formData.categoryId),
+};
 
       let response;
 

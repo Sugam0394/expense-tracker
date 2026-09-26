@@ -7,14 +7,14 @@ export interface Expense {
 }
 
  export interface CreateExpenseInput {
-  amount: string;
+  amount: number;
   description: string;
   date: string;
   categoryId: number;
 }
 
 export interface UpdateExpenseInput {
-  amount: string;
+  amount: number;
   description: string;
   date: string;
   categoryId: number;
