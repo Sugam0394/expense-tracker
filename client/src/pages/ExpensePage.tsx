@@ -395,11 +395,19 @@ function ExpensePage() {
       <hr />
 
       {/* =====================================================
-          FILTER SECTION
-          ===================================================== */}
-      <section style={{ marginBottom: "20px", padding: "10px", background: "#f9f9f9", borderRadius: "5px" }}>
-        <h3>Filter Expenses</h3>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
+    FILTER SECTION
+    ===================================================== */}
+<section className="expense-filters">
+  <h3>Filter Expenses</h3>
+
+  <div
+    style={{
+      display: "flex",
+      gap: "10px",
+      flexWrap: "wrap",
+      marginBottom: "10px",
+    }}
+  >
           <div>
             <label style={{ display: "block", fontSize: "12px" }}>Category</label>
             <select
